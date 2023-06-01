@@ -37,3 +37,16 @@ df.head()
 
 
 # %%
+df['company'].value_counts()
+
+# %%
+null_index = df[df['company'] == 'NULL']
+print(null_index)
+
+
+# %%
+null_index['first_name'].info
+
+# %%
+df.loc[867]
+# %%
