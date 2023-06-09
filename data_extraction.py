@@ -1,6 +1,8 @@
 # %%
 import database_utils
 import pandas as pd
+from datetime import datetime
+
 
 class DataExtractor:
     def __init__(self) -> None:
@@ -24,29 +26,6 @@ class DataExtractor:
             #print(user_data.head())
             return user_data
 
-database = database_utils.DatabaseConnector('db_creds.yaml')
-table = DataExtractor()
-df = table.read_rds_table(database, 'legacy_users')    
-
-
-# if __name__ == '__main__':
-#     main()
-
-# %%
-df.head()
-
-
-# %%
-df['company'].value_counts()
-
-# %%
-null_index = df[df['company'] == 'NULL']
-print(null_index)
-
-
-# %%
-null_index['first_name'].info
-
-# %%
-df.loc[867]
-# %%
+# database = database_utils.DatabaseConnector('db_creds.yaml')
+# table = DataExtractor()
+# df = table.read_rds_table(database, 'legacy_users')

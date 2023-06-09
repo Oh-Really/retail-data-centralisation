@@ -1,5 +1,6 @@
 import yaml
 from sqlalchemy import create_engine, inspect
+import pandas as pd
 
 class DatabaseConnector:
         def __init__(self, yaml_file) -> None:
@@ -25,6 +26,3 @@ class DatabaseConnector:
         # Upload a df to the DB
         def upload_to_db(self, df, table_name:str):
              df.to_sql(table_name, self.init_db_engine())
-             
-
-database = DatabaseConnector('db_creds.yaml')
