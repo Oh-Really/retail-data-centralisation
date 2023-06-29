@@ -1,3 +1,4 @@
-# ignoring
+# ignoring unwanted files
 __pycache__/
 *.csv
+db_creds_local.yaml

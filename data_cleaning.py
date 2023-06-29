@@ -1,5 +1,5 @@
-import data_extraction
-import database_utils
+# import data_extraction
+# import database_utils
 import pandas as pd
 
 class DataCleaning:
@@ -54,9 +54,22 @@ class DataCleaning:
                         return date_str
     
 
-    def clean_card_data(self, df):
-        null_rows = df['date_payment_confirmed'] == 'NULL'
-        df = df[~null_rows]
-        df['date_payment_confirmed'] = pd.to_datetime(df['date_payment_confirmed'], errors='coerce')
+    def clean_card_data(self, card_df):
+        null_rows = card_df['date_payment_confirmed'] == 'NULL'
+        card_df = card_df[~null_rows]
+        card_df['date_payment_confirmed'] = pd.to_datetime(card_df['date_payment_confirmed'], errors='coerce')
+        card_df = card_df[~card_df['date_payment_confirmed'].isna()]
+        card_df.loc[:,'card_number'] = card_df['card_number'].apply(self.card_number_cleaning)
+        #card_df.loc[:, 'expiry_date'] = pd.to_datetime(card_df['expiry_date'], format='%m/%d')
         
-        return df
+        return card_df
+
+
+    def card_number_cleaning(self, card_num):
+        if isinstance(card_num, int):
+            pass
+        elif isinstance(card_num, str):
+            card_num = card_num.replace('?', '')
+            if card_num.isdigit():
+                return int(card_num)
+        return card_num
