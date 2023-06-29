@@ -33,9 +33,10 @@ class DataCleaning:
             df.loc[:, 'address'] = df['address'].str.replace('\n', ' ')
             df.loc[:, 'address'] = df['address'].str.replace('/', '')
 
+
             return df
 
-    # This function goes through all the formats of times in the df, conversting them to Timestamp prior to the column then 
+    # This function goes through all the formats of times in the df, converting them to Timestamp prior to the column then 
     # undergoing .to_datetime()
     def convert_to_datetime(self, date_str):
         try:
@@ -51,14 +52,11 @@ class DataCleaning:
                         return pd.to_datetime(date_str, format='%B %Y %d')
                     except ValueError:
                         return date_str
+    
 
-
-
-
-if __name__ == '__main__':
-     dc = DataCleaning()
-     database = database_utils.DatabaseConnector('db_creds.yaml')
-     table = data_extraction.DataExtractor()
-     df = table.read_rds_table(database, 'legacy_users')
-     dc.clean_user_data(df)
-     print(df.info())
+    def clean_card_data(self, df):
+        null_rows = df['date_payment_confirmed'] == 'NULL'
+        df = df[~null_rows]
+        df['date_payment_confirmed'] = pd.to_datetime(df['date_payment_confirmed'], errors='coerce')
+        
+        return df
