@@ -3,8 +3,9 @@ from sqlalchemy import create_engine, inspect
 import pandas as pd
 
 class DatabaseConnector:
-        def __init__(self, yaml_file) -> None:
-             self.yaml_file = yaml_file
+        def __init__(self) -> None:
+             #self.yaml_file = yaml_file
+             pass
 
         def read_db_creds(self, yaml_file: str):
             '''Takes in a yaml file and return a dictionary representation'''
@@ -13,16 +14,15 @@ class DatabaseConnector:
             return contents
         
         # Create a SQLAlchemy connection engine object
-        def init_db_engine(self):
-             c = self.read_db_creds(self.yaml_file)
-             engine = create_engine(f"postgresql+psycopg2://{c['RDS_USER']}:{c['RDS_PASSWORD']}@{c['RDS_HOST']}:{c['RDS_PORT']}/{c['RDS_DATABASE']}")
+        def init_db_engine(self, cred):
+             engine = create_engine(f"postgresql+psycopg2://{cred['RDS_USER']}:{cred['RDS_PASSWORD']}@{cred['RDS_HOST']}:{cred['RDS_PORT']}/{cred['RDS_DATABASE']}")
              return engine        
         
-        # List the db's available in this db
-        def list_db_tables(self):
-             inspector = inspect(self.init_db_engine())
+        # List the tables available in this db
+        def list_db_tables(self, engine):
+             inspector = inspect(engine)
              return inspector.get_table_names()
         
         # Upload a df to the DB
-        def upload_to_db(self, df, table_name:str):
-             df.to_sql(table_name, self.init_db_engine())
+        def upload_to_db(self, df, table_name:str, engine):
+             df.to_sql(table_name, engine, if_exists='replace')

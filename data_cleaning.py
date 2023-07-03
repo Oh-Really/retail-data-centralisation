@@ -63,6 +63,17 @@ class DataCleaning:
         #card_df.loc[:, 'expiry_date'] = pd.to_datetime(card_df['expiry_date'], format='%m/%d')
         
         return card_df
+    
+    def clean_store_date(self, df):
+        df = df.drop('index', axis=1)
+        df = df.reset_index(drop=True)
+        df = self.clean_address(df, 'address')
+        df = df.drop('lat', axis=1)
+        df.loc[:,'opening_date'] = df['opening_date'].apply(self.convert_to_datetime)
+        df.loc[:,'opening_date'] = pd.to_datetime(df['opening_date'], errors='coerce')
+        df.dropna(subset = 'opening_date', how='any', inplace=True)
+        df.loc[:, 'continent'] = df['continent'].str.replace('ee', '')
+        return df
 
 
     def card_number_cleaning(self, card_num):
@@ -73,3 +84,22 @@ class DataCleaning:
             if card_num.isdigit():
                 return int(card_num)
         return card_num
+    
+    def clean_address(self, df, column_name):
+        df.loc[:, column_name] = df[column_name].str.replace('\n', ' ')
+        df.loc[:, column_name] = df[column_name].str.replace('/', '')
+        return df
+
+    def standardise_phone_number(phone_number):
+        ## if the first character is a "+", remove it.
+        if phone_number[0] == '+':
+            phone_number = phone_number.replace('+', '')        
+        ## remove all whitespace from the phone number
+        phone_number = phone_number.strip()        
+        ## remove hyphens from the phone number
+        phone_number = phone_number.replace('-', '')        
+        ## if the number doesn't start with 00, prepend 00 to it beginning of the number
+        if phone_number[:3] != '00':
+            phone_number = '00' + phone_number        
+        ## return the phone number
+        return phone_number

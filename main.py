@@ -1,17 +1,51 @@
 # %%
-import data_extraction
-import database_utils
-import data_cleaning
+from data_extraction import DataExtractor
+from database_utils import DatabaseConnector
+from data_cleaning import DataCleaning
 import pandas as pd
 
-if __name__ == '__main__':
-     dc = data_cleaning.DataCleaning()
-     database = database_utils.DatabaseConnector('db_creds.yaml')
-     table = data_extraction.DataExtractor()
-     df = table.read_rds_table(database, 'legacy_users')
+
+def upload_dim_users():
+     dc = DataCleaning()
+     database = DatabaseConnector()
+     table = DataExtractor()
+     cred = database.read_db_creds("db_creds.yaml")
+     engine = database.init_db_engine(cred)
+     #print(type(engine))
+     df = table.read_rds_table(engine, 'legacy_users')
      df = dc.clean_user_data(df)
-     card_df = table.retrieve_pdf_data()
-     card_df = dc.clean_card_data(card_df)
-# %%
-#duplicates = df.duplicated(['first_name', 'last_name'], False)
+     cred = database.read_db_creds("db_creds_local.yaml") 
+     engine = database.init_db_engine(cred)
+     engine.connect()
+     database.upload_to_db(df,'dim_users',engine)
+     return df
+
+
+def upload_card_details():
+     dc = DataCleaning()
+     database = DatabaseConnector()
+     table = DataExtractor()
+     df = table.retrieve_pdf_data()
+     df = dc.clean_card_data(df)
+     return df
+
+#store info
+def upload_store_info():                 
+         de = DataExtractor()         
+         df = de.retrieve_stores_data()
+         database = DatabaseConnector
+         cred = database.read_db_creds("db_creds_local.yaml")
+         engine = database.init_db_engine(cred)
+         engine.connect()
+         database.upload_to_db(df, 'dim_store_details', engine)
+         return df
+
+if __name__ == '__main__':
+     user_df = upload_dim_users()
+     card_df = upload_card_details()
+     stores_df = store_info()
+     # dc = DataCleaning()
+     # database = DatabaseConnector()
+     # table = DataExtractor()
+
 # %%

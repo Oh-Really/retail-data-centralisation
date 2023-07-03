@@ -1,31 +1,30 @@
 # %%
-import database_utils
+from database_utils import DatabaseConnector
 import pandas as pd
-from datetime import datetime
 import tabula
+import requests
 
 
 class DataExtractor:
     def __init__(self) -> None:
         pass
 
-    def read_rds_table(self, DatabaseConnector: type[database_utils.DatabaseConnector], 
-                       table_name: str) -> pd.DataFrame:
+    def read_rds_table(self, engine, table_name: str) -> pd.DataFrame:
         '''
         Arguments:
-        DatabaseConenctor: instance of the DatabaseConenctor class
+        engine: SQLAlchemy engine object that comes from DatabaseConnector class
         table_name: Which table one is looking to extract from the db
         ------
         Return: DataFrame object of table_name
         '''
         while True:
-            if table_name not in DatabaseConnector.list_db_tables():
+            if table_name not in DatabaseConnector.list_db_tables(self, engine):
                 print(f"Table name not in database. Please select from following options: \n")
-                print(DatabaseConnector.list_db_tables())
+                print(engine.list_db_tables(engine))
                 break
             else:
-                user_data = pd.read_sql_table(table_name, DatabaseConnector.init_db_engine(), index_col='index')
-            return user_data
+                with engine.begin() as conn:
+                    return pd.read_sql_table(table_name, con = conn, index_col='index')
 
 
 
@@ -33,4 +32,24 @@ class DataExtractor:
         df_list = tabula.read_pdf("https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf", pages='all')
         df = pd.concat(df_list, ignore_index=True)
         return df
-# %%
+    
+
+    def API_key(self):
+        return {"x-api-key": "yFBQbwXe9J3sd6zWVAMrK6lcxxr0q1lr2PT6DDMX"}
+        
+
+    def list_number_stores(self):
+        url_base = 'https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores'
+        response = requests.get(url_base, headers=self.API_key())
+        return response.json()['number_stores']
+    
+    
+    def retrieve_stores_data(self):
+        df_list = []
+        num_stores = self.list_number_stores()
+        for _ in range(num_stores):
+            url_base = f'https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/{_}'
+            response = requests.get(url_base, headers=self.API_key())
+            df_list.append(pd.json_normalize(response.json()))
+       
+        return pd.concat(df_list)
