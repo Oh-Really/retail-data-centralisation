@@ -43,7 +43,7 @@ def upload_store_info():
 if __name__ == '__main__':
      user_df = upload_dim_users()
      card_df = upload_card_details()
-     stores_df = store_info()
+     stores_df = upload_store_info()
      # dc = DataCleaning()
      # database = DatabaseConnector()
      # table = DataExtractor()
