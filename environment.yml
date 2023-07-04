@@ -1,14 +1,16 @@
-name: retail
+name: retail2
 channels:
+  - conda-forge
   - defaults
 dependencies:
   - bzip2=1.0.8=he774522_0
-  - ca-certificates=2023.01.10=haa95532_0
+  - ca-certificates=2023.5.7=h56e8100_0
   - libffi=3.4.4=hd77b12b_0
-  - openssl=1.1.1t=h2bbff1b_0
+  - openjdk=17.0.3=h57928b3_1
+  - openssl=3.0.8=h2bbff1b_0
   - pip=23.0.1=py311haa95532_0
-  - python=3.11.3=h966fe2a_0
-  - setuptools=66.0.0=py311haa95532_0
+  - python=3.11.3=he1021f5_1
+  - setuptools=67.8.0=py311haa95532_0
   - sqlite=3.41.2=h2bbff1b_0
   - tk=8.6.12=h2bbff1b_0
   - vc=14.2=h21ff451_1
@@ -17,13 +19,24 @@ dependencies:
   - xz=5.4.2=h8cc25b3_0
   - zlib=1.2.13=h8cc25b3_0
   - pip:
+    - boto3==1.27.0
+    - botocore==1.30.0
+    - certifi==2023.5.7
+    - charset-normalizer==3.1.0
+    - distro==1.8.0
     - greenlet==2.0.2
+    - idna==3.4
+    - jmespath==1.0.1
     - numpy==1.24.3
-    - pandas==2.0.1
+    - pandas==2.0.2
     - psycopg2==2.9.6
     - pytz==2023.3
     - pyyaml==6.0
-    - sqlalchemy==2.0.13
-    - typing-extensions==4.5.0
+    - requests==2.31.0
+    - s3transfer==0.6.1
+    - sqlalchemy==2.0.15
+    - tabula-py==2.7.0
+    - typing-extensions==4.6.3
     - tzdata==2023.3
-prefix: C:\Users\morei\anaconda3\envs\retail
+    - urllib3==1.26.16
+prefix: C:\Users\morei\anaconda3\envs\retail2
