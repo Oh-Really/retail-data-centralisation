@@ -31,19 +31,28 @@ def upload_card_details():
 
 #store info
 def upload_store_info():                 
-         de = DataExtractor()         
+         de = DataExtractor()       
+         dc = DataCleaning()  
          df = de.retrieve_stores_data()
-         database = DatabaseConnector
+         df = dc.clean_store_data(df)
+         database = DatabaseConnector()         
          cred = database.read_db_creds("db_creds_local.yaml")
          engine = database.init_db_engine(cred)
          engine.connect()
          database.upload_to_db(df, 'dim_store_details', engine)
          return df
 
+def upload_product_info():
+      de = DataExtractor()
+      df = de.extract_from_s3()
+      return df
+
 if __name__ == '__main__':
      user_df = upload_dim_users()
      card_df = upload_card_details()
      stores_df = upload_store_info()
+     s3 = upload_product_info()
+
      # dc = DataCleaning()
      # database = DatabaseConnector()
      # table = DataExtractor()
