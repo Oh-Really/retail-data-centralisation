@@ -44,7 +44,14 @@ def upload_store_info():
 
 def upload_product_info():
       de = DataExtractor()
+      dc = DataCleaning()
+      database = DatabaseConnector()
       df = de.extract_from_s3()
+      df = dc.clean_products_data(df)
+      cred = database.read_db_creds("db_creds_local.yaml")
+      engine = database.init_db_engine(cred)
+      engine.connect()
+      database.upload_to_db(df, 'dim_products', engine)
       return df
 
 if __name__ == '__main__':
