@@ -3,6 +3,8 @@ from database_utils import DatabaseConnector
 import pandas as pd
 import tabula
 import requests
+import boto3
+import io
 
 
 class DataExtractor:
@@ -50,6 +52,20 @@ class DataExtractor:
         for _ in range(num_stores):
             url_base = f'https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/{_}'
             response = requests.get(url_base, headers=self.API_key())
+
             df_list.append(pd.json_normalize(response.json()))
        
         return pd.concat(df_list)
+    
+  
+    
+    def extract_from_s3(self):
+        s3 = boto3.client('s3')
+        obj = s3.get_object(Bucket='data-handling-public', Key='products.csv')
+        df = df = pd.read_csv(io.BytesIO(obj['Body'].read()), encoding='utf8')
+        return df
+
+# if __name__ == '__main__':
+#     de = DataExtractor()
+#     s3 = de.extract_from_s3()
+# %%
