@@ -64,7 +64,7 @@ class DataCleaning:
         
         return card_df
     
-    def clean_store_date(self, df):
+    def clean_store_data(self, df):
         df = df.drop('index', axis=1)
         df = df.reset_index(drop=True)
         df = self.clean_address(df, 'address')
@@ -74,6 +74,41 @@ class DataCleaning:
         df.dropna(subset = 'opening_date', how='any', inplace=True)
         df.loc[:, 'continent'] = df['continent'].str.replace('ee', '')
         return df
+    
+    def clean_products_data(self, df):
+        df = df.drop('Unnamed: 0', axis=1)
+        df.loc[:,'weight'] = df['weight'].apply(self.convert_product_weights)
+        df.dropna(inplace=True)
+        return df
+
+    def convert_product_weights(self, weight):
+        # if last two chars are 'kg' then skip
+        weight = str(weight)
+        if weight.endswith('kg'):
+            weight = weight.replace('kg', '')
+            weight = self.weight_calculation(weight)
+            return float(weight)
+        elif weight.endswith('g'):
+            weight = weight.replace('g', '')
+            weight = self.weight_calculation(weight)
+            return float(float(weight)/1000)
+        elif weight.endswith('ml'):
+            weight = weight.replace('ml', '')
+            weight = self.weight_calculation(weight)
+            return float(float(weight)/1000)
+        elif weight.endswith('oz'):
+            weight = weight.replace('oz', '')
+            weight = self.weight_calculation(weight)
+            return float(float(weight)/35.274)
+
+
+    def weight_calculation(self, value):
+        if 'x' in value:
+            value.replace(' ','')
+            components = value.split('x')
+            return str(float(components[0])*float(components[1]))
+        return value
+
 
 
     def card_number_cleaning(self, card_num):
