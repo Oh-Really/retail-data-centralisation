@@ -57,7 +57,7 @@ class DataCleaning:
     def clean_card_data(self, card_df):
         null_rows = card_df['date_payment_confirmed'] == 'NULL'
         card_df = card_df[~null_rows]
-        card_df['date_payment_confirmed'] = pd.to_datetime(card_df['date_payment_confirmed'], errors='coerce')
+        card_df.loc[:, 'date_payment_confirmed'] = pd.to_datetime(card_df['date_payment_confirmed'], errors='coerce')
         card_df = card_df[~card_df['date_payment_confirmed'].isna()]
         card_df.loc[:,'card_number'] = card_df['card_number'].apply(self.card_number_cleaning)
         #card_df.loc[:, 'expiry_date'] = pd.to_datetime(card_df['expiry_date'], format='%m/%d')
@@ -79,6 +79,19 @@ class DataCleaning:
         df = df.drop('Unnamed: 0', axis=1)
         df.loc[:,'weight'] = df['weight'].apply(self.convert_product_weights)
         df.dropna(inplace=True)
+        return df
+    
+    def clean_orders_data(self, df):
+        df.drop(['1', 'first_name', 'last_name', 'level_0'], axis=1, inplace=True)
+        return df
+    
+    def clean_sales_data(self, df):
+        df['timestamp'] = pd.to_datetime(df['timestamp'], format="%H:%M:%S", errors='coerce')
+        df['hour'] = df['timestamp'].dt.hour
+        df['minute'] = df['timestamp'].dt.minute
+        df['second'] = df['timestamp'].dt.second
+        df['sale_date'] = pd.to_datetime(df[['year', 'month', 'day', 'hour', 'minute', 'second']], errors='coerce')
+        df.drop(df.columns[[0, 1, 2, 3, 6, 7, 8]], axis=1, inplace=True)
         return df
 
     def convert_product_weights(self, weight):
