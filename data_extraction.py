@@ -55,8 +55,7 @@ class DataExtractor:
 
             df_list.append(pd.json_normalize(response.json()))
        
-        return pd.concat(df_list)
-    
+        return pd.concat(df_list)    
   
     
     def extract_from_s3(self):
@@ -64,8 +63,15 @@ class DataExtractor:
         obj = s3.get_object(Bucket='data-handling-public', Key='products.csv')
         df = df = pd.read_csv(io.BytesIO(obj['Body'].read()), encoding='utf8')
         return df
+    
+    
+    def retrieve_json_products(self):
+        url = 'https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json'
+        df = pd.read_json(url)
+        return df
+
 
 # if __name__ == '__main__':
 #     de = DataExtractor()
-#     s3 = de.extract_from_s3()
+#     sales = de.retrieve_json_products()
 # %%
