@@ -93,9 +93,3 @@ if __name__ == '__main__':
      s3 = upload_product_info()
      order_df = order_data()
      sales_df = sale_dates()
-
-     # dc = DataCleaning()
-     # database = DatabaseConnector()
-     # table = DataExtractor()
-
-# %%
