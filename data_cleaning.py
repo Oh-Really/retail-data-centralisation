@@ -1,15 +1,14 @@
-# import data_extraction
-# import database_utils
+# %%
+import data_extraction
+import database_utils
 import pandas as pd
+import re
 
 class DataCleaning:
+    def __init__(self) -> None:
+        pass
 
-
-    def clean_user_data(self, df):
-            # database = database_utils.DatabaseConnector('db_creds.yaml')
-            # table = data_extraction.DataExtractor()
-            # df = table.read_rds_table(database, 'legacy_users')
-            # print(df.head())
+    def clean_user_data(self, df) -> pd.DataFrame:
             # These are not the same as NaN values, but the string 'NULL'. Lets get rid of these rows
             # Returns a Series object where True is in place for the string NULL    
             null_rows = df['date_of_birth'] == 'NULL'
@@ -32,6 +31,7 @@ class DataCleaning:
             # Removing unwanted characters from address column
             df.loc[:, 'address'] = df['address'].str.replace('\n', ' ')
             df.loc[:, 'address'] = df['address'].str.replace('/', '')
+            df.loc[:, 'country_code'] = df['country_code'].str.replace('GBB', 'GB')
 
 
             return df
@@ -54,17 +54,16 @@ class DataCleaning:
                         return date_str
     
 
-    def clean_card_data(self, card_df):
+    def clean_card_data(self, card_df) -> pd.DataFrame:
         null_rows = card_df['date_payment_confirmed'] == 'NULL'
         card_df = card_df[~null_rows]
         card_df.loc[:, 'date_payment_confirmed'] = pd.to_datetime(card_df['date_payment_confirmed'], errors='coerce')
         card_df = card_df[~card_df['date_payment_confirmed'].isna()]
         card_df.loc[:,'card_number'] = card_df['card_number'].apply(self.card_number_cleaning)
-        #card_df.loc[:, 'expiry_date'] = pd.to_datetime(card_df['expiry_date'], format='%m/%d')
         
         return card_df
     
-    def clean_store_data(self, df):
+    def clean_store_data(self, df) -> pd.DataFrame:
         df = df.drop('index', axis=1)
         df = df.reset_index(drop=True)
         df = self.clean_address(df, 'address')
@@ -73,25 +72,26 @@ class DataCleaning:
         df.loc[:,'opening_date'] = pd.to_datetime(df['opening_date'], errors='coerce')
         df.dropna(subset = 'opening_date', how='any', inplace=True)
         df.loc[:, 'continent'] = df['continent'].str.replace('ee', '')
+        df.loc[:, 'staff_numbers'] = df['staff_numbers'].apply(lambda x: re.sub('[a-zA-Z]', '', x))
         return df
     
-    def clean_products_data(self, df):
+    def clean_products_data(self, df) -> pd.DataFrame:
         df = df.drop('Unnamed: 0', axis=1)
         df.loc[:,'weight'] = df['weight'].apply(self.convert_product_weights)
         df.dropna(inplace=True)
         return df
     
-    def clean_orders_data(self, df):
+    def clean_orders_data(self, df) -> pd.DataFrame:
         df.drop(['1', 'first_name', 'last_name', 'level_0'], axis=1, inplace=True)
         return df
     
-    def clean_sales_data(self, df):
+    def clean_sales_data(self, df) -> pd.DataFrame:
         df['timestamp'] = pd.to_datetime(df['timestamp'], format="%H:%M:%S", errors='coerce')
         df['hour'] = df['timestamp'].dt.hour
         df['minute'] = df['timestamp'].dt.minute
         df['second'] = df['timestamp'].dt.second
         df['sale_date'] = pd.to_datetime(df[['year', 'month', 'day', 'hour', 'minute', 'second']], errors='coerce')
-        df.drop(df.columns[[0, 1, 2, 3, 6, 7, 8]], axis=1, inplace=True)
+        df = df[~df['sale_date'].isna()]
         return df
 
     def convert_product_weights(self, weight):
@@ -133,21 +133,22 @@ class DataCleaning:
                 return int(card_num)
         return card_num
     
-    def clean_address(self, df, column_name):
+    def clean_address(self, df, column_name) -> pd.DataFrame:
         df.loc[:, column_name] = df[column_name].str.replace('\n', ' ')
         df.loc[:, column_name] = df[column_name].str.replace('/', '')
         return df
 
-    def standardise_phone_number(phone_number):
-        ## if the first character is a "+", remove it.
-        if phone_number[0] == '+':
-            phone_number = phone_number.replace('+', '')        
-        ## remove all whitespace from the phone number
-        phone_number = phone_number.strip()        
-        ## remove hyphens from the phone number
-        phone_number = phone_number.replace('-', '')        
-        ## if the number doesn't start with 00, prepend 00 to it beginning of the number
-        if phone_number[:3] != '00':
-            phone_number = '00' + phone_number        
-        ## return the phone number
-        return phone_number
+
+if __name__ == '__main__':
+     dc = DataCleaning()
+     database = database_utils.DatabaseConnector()
+     de = data_extraction.DataExtractor()
+     #df = de.retrieve_json_products()
+     #df = dc.clean_sales_data(df)
+    #  df = dc.clean_sales_data(df)
+    #  cred = database.read_db_creds("db_creds_local.yaml")
+    #  engine = database.init_db_engine(cred)
+    #  engine.connect()
+    #  database.upload_to_db(df, 'dim_date_times', engine)
+  
+# %%
